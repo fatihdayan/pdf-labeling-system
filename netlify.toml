@@ -1,11 +1,8 @@
 [build]
-  publish = "public"       # Yayınlanacak klasör (örnek: build, dist, public, pdfs)
-  command = ""             # Derleme komutu (statik siteyse boş bırakılabilir)
-
-[build.environment]
-  NODE_VERSION = "18"
+  publish = "/"
+  functions = "netlify/functions"
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/pdf_labeling_system.html"
   status = 200
