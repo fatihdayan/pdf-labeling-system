@@ -236,53 +236,56 @@
 </head>
 <body>
     <div class="container">
-        <h1>PDF Etiketleme Sistemi</h1>
-        <div class="main-content">
-            <div class="sidebar">
-                <div>
-                    <h3>Proje</h3>
-                    <button class="btn btn-primary" id="newProjectBtn">Yeni Proje Aç</button>
-                    <button class="btn btn-success" id="saveProjectBtn" disabled>Projeyi Kaydet</button>
-                    <button class="btn btn-primary" id="loadProjectBtn">Proje Yükle</button>
-                    <input type="file" id="projectFileInput" accept=".json" style="display: none;">
+    <h1>PDF Etiketleme Sistemi</h1>
+    <div class="main-content">
+        <div class="sidebar">
+            <div>
+                <h3>Proje</h3>
+                <button class="btn btn-primary" id="newProjectBtn">Yeni Proje Aç</button>
+                <button class="btn btn-success" id="saveProjectBtn" disabled>Projeyi Kaydet</button>
+                <button class="btn btn-primary" id="loadProjectBtn">Proje Yükle</button>
+                <input type="file" id="projectFileInput" accept=".json" style="display: none;">
+            </div>
+            <div>
+                <h3>Etiketler</h3>
+                <div class="input-group">
+                    <input type="text" id="labelInput" placeholder="Etiket adı" disabled>
+                    <input type="color" id="colorInput" value="#ff6b6b" disabled>
+                    <button class="btn btn-success" id="addLabelBtn" disabled>Ekle</button>
                 </div>
-                <div>
-                    <h3>Etiketler</h3>
-                    <div class="input-group">
-                        <input type="text" id="labelInput" placeholder="Etiket adı" disabled>
-                        <input type="color" id="colorInput" value="#ff6b6b" disabled>
-                        <button class="btn btn-success" id="addLabelBtn" disabled>Ekle</button>
-                    </div>
-                    <div class="label-list" id="labelList"></div>
-                </div>
-                <div>
-                    <h3>Mod</h3>
-                    <div class="mode-toggle">
-                        <button class="mode-btn active" id="labelModeBtn">Etiketle</button>
-                        <button class="mode-btn" id="eraserModeBtn">Silgi</button>
-                    </div>
-                </div>
-                <div>
-                    <h3>PDF Dosyası</h3>
-                    <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" disabled>
-                    <button class="btn btn-primary" id="uploadPdfBtn" disabled>PDF Yükle</button>
-                    <div class="pdf-list" id="pdfList"></div>
+                <div class="label-list" id="labelList"></div>
+            </div>
+            <div>
+                <h3>Mod</h3>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="labelModeBtn">Etiketle</button>
+                    <button class="mode-btn" id="eraserModeBtn">Silgi</button>
                 </div>
             </div>
-            <div class="workspace">
-                <div>
-                    <h3>PDF Görüntüleme</h3>
-                    <div id="pdfDisplay">PDF bekleniyor...</div>
-                </div>
-                <div>
-                    <h3>Dışa Aktar</h3>
-                    <button class="btn btn-success" id="exportJsonBtn" disabled>JSON İndir</button>
-                    <button class="btn btn-success" id="exportCsvBtn" disabled>CSV İndir</button>
-                </div>
+            <div>
+                <h3>PDF Dosyası</h3>
+                <button class="btn btn-primary" id="refreshListBtn">Listeyi Yenile</button>
+                <div class="pdf-list" id="pdfList"></div>
             </div>
         </div>
-        <div id="statusText">Durum: Hazır</div>
+        <div class="workspace">
+            <div>
+                <h3>PDF Görüntüleme</h3>
+                <div id="pdfDisplay">PDF bekleniyor...</div>
+            </div>
+            <div>
+                <h3>Dışa Aktar</h3>
+                <button class="btn btn-success" id="exportJsonBtn" disabled>JSON İndir</button>
+                <button class="btn btn-success" id="exportCsvBtn" disabled>CSV İndir</button>
+            </div>
+        </div>
     </div>
+    <div style="margin-top: 20px;">
+        <h3>İlerleme</h3>
+        <canvas id="progressChart" height="50"></canvas>
+    </div>
+    <div id="statusText">Durum: Hazır</div>
+</div>
 
     <script>
         // PDF.js yüklenmesini kontrol et
