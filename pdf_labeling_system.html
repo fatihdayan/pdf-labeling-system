@@ -552,54 +552,199 @@
             }
         };
 
-        async function uploadPdf(e) {
-            if (typeof pdfjsLib === 'undefined') {
-                updateStatus('Hata: PDF.js kütüphanesi yüklü değil');
-                return;
-            }
-            try {
-                const file = e.target.files[0];
-                if (!file) {
-                    updateStatus('Hata: Hiçbir dosya seçilmedi');
-                    return;
-                }
-                
-                const fileName = file.name;
-                projectData.files[fileName] = { 
-                    annotations: {}, 
-                    pdfData: null,
-                    numPages: 0
-                };
-                Object.keys(projectData.classes).forEach(label => {
+        async function fetchPdfList() {
+    try {
+        const response = await fetch('/.netlify/functions/list-pdfs');
+        if (!response.ok) throw new Error('PDF listesi alınamadı');
+        const files = await response.json();
+        return files;
+    } catch (err) {
+        console.error('PDF listesi alınamadı:', err);
+        updateStatus('Hata: PDF listesi yüklenemedi');
+        return [];
+    }
+}
+
+async function checkJsonExists(pdfName) {
+    try {
+        const jsonName = pdfName.replace('.pdf', '.json');
+        const response = await fetch(`/.netlify/functions/check-json?file=${jsonName}`);
+        return response.ok;
+    } catch (err) {
+        return false;
+    }
+}
+
+async function renderPdfList() {
+    elements.pdfList.innerHTML = '';
+    const pdfFiles = await fetchPdfList();
+    for (const fileName of pdfFiles) {
+        const hasJson = await checkJsonExists(fileName);
+        const item = document.createElement('div');
+        item.className = `pdf-item ${currentPdfFile === fileName ? 'active' : ''}`;
+        item.innerHTML = `
+            <span style="flex: 1;">${fileName} ${hasJson ? '✔' : ''}</span>
+            <button class="btn btn-danger" onclick="deletePdf('${fileName}')">Sil</button>
+        `;
+        item.querySelector('span').addEventListener('click', async () => {
+            console.log('PDF seçildi:', fileName);
+            await loadPdf(fileName);
+        });
+        elements.pdfList.appendChild(item);
+    }
+    await renderProgressBar();
+}
+
+async function loadPdf(fileName) {
+    if (!projectData.files[fileName]) {
+        try {
+            const response = await fetch(`/pdfs/${fileName}`);
+            if (!response.ok) throw new Error('PDF indirilemedi');
+            const arrayBuffer = await response.arrayBuffer();
+            projectData.files[fileName] = {
+                annotations: {},
+                pdfData: arrayBuffer,
+                numPages: 0
+            };
+            Object.keys(projectData.classes).forEach(label => {
+                projectData.files[fileName].annotations[label] = [];
+            });
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer, disableCache: true });
+            const pdf = await loadingTask.promise;
+            projectData.files[fileName].numPages = pdf.numPages;
+            currentPdfFile = fileName;
+            currentPage = 1;
+            renderPdfList();
+            updateStatus(`PDF "${fileName}" yükleniyor...`);
+            await renderPage(1);
+            await loadAnnotations(fileName);
+            updateStatus(`PDF "${fileName}" yüklendi`);
+        } catch (err) {
+            console.error(`PDF yükleme hatası (${fileName}):`, err);
+            updateStatus(`Hata: "${fileName}" yüklenemedi`);
+        }
+    } else {
+        currentPdfFile = fileName;
+        currentPage = 1;
+        renderPdfList();
+        await renderPage(1);
+        await loadAnnotations(fileName);
+        updateStatus(`PDF "${fileName}" yüklendi`);
+    }
+}
+
+async function loadAnnotations(fileName) {
+    try {
+        const jsonName = fileName.replace('.pdf', '.json');
+        const response = await fetch(`/.netlify/functions/check-json?file=${jsonName}`);
+        if (response.ok) {
+            const data = await response.json();
+            projectData.files[fileName].annotations = data.files[fileName] || {};
+            restoreAnnotations(document.querySelector('#pdfDisplay > div'), currentPage);
+            updateStatus(`"${fileName}" için etiketler yüklendi`);
+        } else {
+            Object.keys(projectData.classes).forEach(label => {
+                if (!projectData.files[fileName].annotations[label]) {
                     projectData.files[fileName].annotations[label] = [];
-                });
-                
-                const reader = new FileReader();
-                reader.onload = async (event) => {
-                    try {
-                        projectData.files[fileName].pdfData = event.target.result;
-                        const loadingTask = pdfjsLib.getDocument({ data: event.target.result, disableCache: true });
-                        const pdf = await loadingTask.promise;
-                        projectData.files[fileName].numPages = pdf.numPages;
-                        renderPdfList();
-                        updateStatus(`PDF "${fileName}" yüklendi`);
-                        await loadPdf(fileName);
-                    } catch (err) {
-                        console.error(`PDF yükleme hatası (${fileName}):`, err);
-                        updateStatus(`Hata: "${fileName}" yüklenemedi`);
+                }
+            });
+        }
+    } catch (err) {
+        console.error('Etiket yükleme hatası:', err);
+        updateStatus('Hata: Etiketler yüklenemedi');
+    }
+}
+
+async function exportJson() {
+    try {
+        const exportData = {
+            project_name: projectData.name,
+            date: projectData.date,
+            classes: projectData.classes,
+            files: { [currentPdfFile]: projectData.files[currentPdfFile].annotations }
+        };
+        const pdfName = currentPdfFile.replace('.pdf', '');
+        const jsonName = `${pdfName}.json`;
+        const response = await fetch('/.netlify/functions/save-json', {
+            method: 'POST',
+            body: JSON.stringify({ fileName: jsonName, data: exportData })
+        });
+        if (response.ok) {
+            updateStatus('JSON kaydedildi');
+            renderPdfList();
+        } else {
+            throw new Error('JSON kaydetme hatası');
+        }
+    } catch (err) {
+        console.error('JSON dışa aktarma hatası:', err);
+        updateStatus('Hata: JSON kaydedilemedi');
+    }
+}
+
+async function renderProgressBar() {
+    const pdfFiles = await fetchPdfList();
+    let completedCount = 0;
+    for (const fileName of pdfFiles) {
+        if (await checkJsonExists(fileName)) {
+            completedCount++;
+        }
+    }
+    const totalCount = pdfFiles.length;
+    const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['İlerleme'],
+            datasets: [{
+                label: 'Tamamlanan PDF\'ler',
+                data: [percentage],
+                backgroundColor: '#28a745',
+                borderColor: '#1e7e34',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Tamamlanma Yüzdesi (%)'
                     }
-                };
-                reader.onerror = (err) => {
-                    console.error(`Dosya okuma hatası (${fileName}):`, err);
-                    updateStatus(`Hata: "${fileName}" okunamadı`);
-                };
-                reader.readAsArrayBuffer(file);
-                e.target.value = '';
-            } catch (err) {
-                console.error('PDF yükleme hatası:', err);
-                updateStatus('Hata: PDF yüklenemedi');
+                },
+                y: {
+                    display: false
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.toFixed(2)}% (${completedCount}/${totalCount} PDF)`;
+                        }
+                    }
+                }
             }
         }
+    });
+}
+
+document.getElementById('refreshListBtn').addEventListener('click', () => {
+    renderPdfList();
+    updateStatus('PDF listesi yenilendi');
+});
+
+// Otomatik yenileme (isteğe bağlı)
+setInterval(() => {
+    renderPdfList();
+}, 30000);
 
         function renderPdfList() {
             elements.pdfList.innerHTML = '';
