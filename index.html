@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Etiketleme Sistemi</title>
+    <title>PDF-Beschriftungssystem</title>
     <!-- Yerel PDF.js kütüphanesi -->
     <script src="lib/pdf.min.js"></script>
     <style>
@@ -232,67 +232,71 @@
             background: rgba(0,0,0,0.5);
             z-index: 999;
         }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-    <h1>PDF Etiketleme Sistemi</h1>
-    <div class="main-content">
-        <div class="sidebar">
-            <div>
-                <h3>Proje</h3>
-                <button class="btn btn-primary" id="newProjectBtn">Yeni Proje Aç</button>
-                <button class="btn btn-success" id="saveProjectBtn" disabled>Projeyi Kaydet</button>
-                <button class="btn btn-primary" id="loadProjectBtn">Proje Yükle</button>
-                <input type="file" id="projectFileInput" accept=".json" style="display: none;">
-            </div>
-            <div>
-                <h3>Etiketler</h3>
-                <div class="input-group">
-                    <input type="text" id="labelInput" placeholder="Etiket adı" disabled>
-                    <input type="color" id="colorInput" value="#ff6b6b" disabled>
-                    <button class="btn btn-success" id="addLabelBtn" disabled>Ekle</button>
+        <h1>PDF-Beschriftungssystem</h1>
+        <div class="main-content">
+            <div class="sidebar">
+                <div>
+                    <h3>Projekt</h3>
+                    <button class="btn btn-primary" id="newProjectBtn">Neues Projekt erstellen</button>
+                    <button class="btn btn-success" id="saveProjectBtn" disabled>Projekt speichern</button>
+                    <button class="btn btn-primary" id="loadProjectBtn">Projekt laden</button>
+                    <input type="file" id="projectFileInput" accept=".json" style="display: none;">
                 </div>
-                <div class="label-list" id="labelList"></div>
-            </div>
-            <div>
-                <h3>Mod</h3>
-                <div class="mode-toggle">
-                    <button class="mode-btn active" id="labelModeBtn">Etiketle</button>
-                    <button class="mode-btn" id="eraserModeBtn">Silgi</button>
+                <div>
+                    <h3>Beschriftungen</h3>
+                    <div class="input-group">
+                        <input type="text" id="labelInput" placeholder="Beschriftungsname" disabled>
+                        <input type="color" id="colorInput" value="#ff6b6b" disabled>
+                        <button class="btn btn-success" id="addLabelBtn" disabled>Hinzufügen</button>
+                    </div>
+                    <div class="label-list" id="labelList"></div>
+                </div>
+                <div>
+                    <h3>Modus</h3>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="labelModeBtn">Beschriftung</button>
+                        <button class="mode-btn" id="eraserModeBtn">Radierer</button>
+                    </div>
+                </div>
+                <div>
+                    <h3>PDF-Datei</h3>
+                    <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" disabled>
+                    <button class="btn btn-primary" id="uploadPdfBtn" disabled>PDF hochladen</button>
+                    <div class="pdf-list" id="pdfList"></div>
                 </div>
             </div>
-            <div>
-                <h3>PDF Dosyası</h3>
-                <button class="btn btn-primary" id="refreshListBtn">Listeyi Yenile</button>
-                <div class="pdf-list" id="pdfList"></div>
+            <div class="workspace">
+                <div>
+                    <h3>PDF-Anzeige</h3>
+                    <div id="pdfDisplay">PDF wird erwartet...</div>
+                </div>
+                <div>
+                    <h3>Exportieren</h3>
+                    <button class="btn btn-success" id="exportJsonBtn" disabled>JSON herunterladen</button>
+                    <button class="btn btn-success" id="exportCsvBtn" disabled>CSV herunterladen</button>
+                </div>
             </div>
         </div>
-        <div class="workspace">
-            <div>
-                <h3>PDF Görüntüleme</h3>
-                <div id="pdfDisplay">PDF bekleniyor...</div>
-            </div>
-            <div>
-                <h3>Dışa Aktar</h3>
-                <button class="btn btn-success" id="exportJsonBtn" disabled>JSON İndir</button>
-                <button class="btn btn-success" id="exportCsvBtn" disabled>CSV İndir</button>
-            </div>
-        </div>
+        <div id="statusText">Status: Bereit</div>
+        <div class="footer">Entwickelt von Fatih Dayan</div>
     </div>
-    <div style="margin-top: 20px;">
-        <h3>İlerleme</h3>
-        <canvas id="progressChart" height="50"></canvas>
-    </div>
-    <div id="statusText">Durum: Hazır</div>
-</div>
 
     <script>
         // PDF.js yüklenmesini kontrol et
         if (typeof pdfjsLib === 'undefined') {
-            console.error('PDF.js kütüphanesi yüklenemedi. lib/pdf.min.js dosyasını kontrol edin.');
-            document.getElementById('statusText').textContent = 'Hata: PDF.js kütüphanesi yüklenemedi';
-            alert('PDF.js kütüphanesi yüklenemedi. lib/pdf.min.js dosyasını kontrol edin.');
+            console.error('PDF.js-Bibliothek konnte nicht geladen werden. Überprüfen Sie die Datei lib/pdf.min.js.');
+            document.getElementById('statusText').textContent = 'Fehler: PDF.js-Bibliothek konnte nicht geladen werden';
+            alert('PDF.js-Bibliothek konnte nicht geladen werden. Überprüfen Sie die Datei lib/pdf.min.js.');
         } else {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.js';
         }
@@ -333,46 +337,46 @@
 
         // Event Listeners
         elements.newProjectBtn.addEventListener('click', () => {
-            console.log('Yeni Proje Aç tıklandı');
+            console.log('Neues Projekt erstellen geklickt');
             createNewProject();
         });
         elements.saveProjectBtn.addEventListener('click', () => {
-            console.log('Projeyi Kaydet tıklandı');
+            console.log('Projekt speichern geklickt');
             saveProject();
         });
         elements.loadProjectBtn.addEventListener('click', () => {
-            console.log('Proje Yükle butonuna tıklandı');
+            console.log('Projekt laden geklickt');
             elements.projectFileInput.click();
         });
         elements.addLabelBtn.addEventListener('click', () => {
-            console.log('Etiket Ekle tıklandı');
+            console.log('Beschriftung hinzufügen geklickt');
             addLabel();
         });
         elements.uploadPdfBtn.addEventListener('click', () => {
-            console.log('PDF Yükle butonuna tıklandı');
+            console.log('PDF hochladen geklickt');
             elements.pdfFileInput.click();
         });
         elements.labelModeBtn.addEventListener('click', () => {
-            console.log('Etiketle modu seçildi');
+            console.log('Beschriftungsmodus ausgewählt');
             projectData.isEraser = false;
             elements.labelModeBtn.classList.add('active');
             elements.eraserModeBtn.classList.remove('active');
-            updateStatus(`Aktif mod: Etiketleme (${projectData.activeLabel || 'Seçilmedi'})`);
+            updateStatus(`Aktiver Modus: Beschriftung (${projectData.activeLabel || 'Nicht ausgewählt'})`);
         });
         elements.eraserModeBtn.addEventListener('click', () => {
-            console.log('Silgi modu seçildi');
+            console.log('Radierermodus ausgewählt');
             projectData.isEraser = true;
             projectData.activeLabel = null;
             elements.eraserModeBtn.classList.add('active');
             elements.labelModeBtn.classList.remove('active');
-            updateStatus('Aktif mod: Silgi');
+            updateStatus('Aktiver Modus: Radierer');
         });
         elements.exportJsonBtn.addEventListener('click', () => {
-            console.log('JSON İndir tıklandı');
+            console.log('JSON herunterladen geklickt');
             exportJson();
         });
         elements.exportCsvBtn.addEventListener('click', () => {
-            console.log('CSV İndir tıklandı');
+            console.log('CSV herunterladen geklickt');
             exportCsv();
         });
         elements.projectFileInput.addEventListener('change', loadProject);
@@ -386,11 +390,11 @@
 
         function createNewProject() {
             try {
-                const projectName = prompt('Proje adını girin:');
+                const projectName = prompt('Projektname eingeben:');
                 if (projectName) {
                     projectData = {
                         name: projectName,
-                        date: new Date().toLocaleDateString('tr-TR'),
+                        date: new Date().toLocaleDateString('de-DE'),
                         classes: {},
                         files: {},
                         activeLabel: null,
@@ -406,14 +410,14 @@
                     elements.pdfFileInput.disabled = true;
                     elements.exportJsonBtn.disabled = true;
                     elements.exportCsvBtn.disabled = true;
-                    elements.pdfDisplay.innerHTML = 'PDF bekleniyor...';
+                    elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
                     elements.pdfList.innerHTML = '';
                     elements.labelList.innerHTML = '';
-                    updateStatus(`Yeni proje "${projectName}" oluşturuldu`);
+                    updateStatus(`Neues Projekt "${projectName}" erstellt`);
                 }
             } catch (err) {
-                console.error('Yeni proje oluşturma hatası:', err);
-                updateStatus('Hata: Yeni proje oluşturulamadı');
+                console.error('Fehler beim Erstellen eines neuen Projekts:', err);
+                updateStatus('Fehler: Neues Projekt konnte nicht erstellt werden');
             }
         }
 
@@ -423,13 +427,13 @@
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `${projectData.name || 'project'}_${Date.now()}.json`;
+                a.download = `${projectData.name || 'projekt'}_${Date.now()}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                updateStatus('Proje kaydedildi');
+                updateStatus('Projekt gespeichert');
             } catch (err) {
-                console.error('Proje kaydetme hatası:', err);
-                updateStatus('Hata: Proje kaydedilemedi');
+                console.error('Fehler beim Speichern des Projekts:', err);
+                updateStatus('Fehler: Projekt konnte nicht gespeichert werden');
             }
         }
 
@@ -437,16 +441,16 @@
             try {
                 const file = e.target.files[0];
                 if (!file) {
-                    updateStatus('Hata: Dosya seçilmedi');
+                    updateStatus('Fehler: Keine Datei ausgewählt');
                     return;
                 }
-                console.log('Proje dosyası seçildi:', file.name);
+                console.log('Projektdatei ausgewählt:', file.name);
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     try {
                         const loadedData = JSON.parse(event.target.result);
                         if (!loadedData.name || !loadedData.date || !loadedData.files || !loadedData.classes) {
-                            throw new Error('Geçersiz proje dosyası formatı');
+                            throw new Error('Ungültiges Projektdateiformat');
                         }
                         projectData = {
                             name: loadedData.name,
@@ -466,25 +470,25 @@
                         elements.pdfFileInput.disabled = false;
                         elements.exportJsonBtn.disabled = false;
                         elements.exportCsvBtn.disabled = false;
-                        elements.pdfDisplay.innerHTML = 'PDF bekleniyor...';
+                        elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
                         renderLabels();
                         renderPdfList();
-                        updateStatus(`Proje "${projectData.name}" yüklendi`);
+                        updateStatus(`Projekt "${projectData.name}" geladen`);
                     } catch (err) {
-                        console.error('Proje dosyası işleme hatası:', err);
-                        updateStatus('Hata: Proje dosyası yüklenemedi');
-                        alert('Proje dosyası yüklenemedi: ' + err.message);
+                        console.error('Fehler beim Verarbeiten der Projektdatei:', err);
+                        updateStatus('Fehler: Projektdatei konnte nicht geladen werden');
+                        alert('Projektdatei konnte nicht geladen werden: ' + err.message);
                     }
                 };
                 reader.onerror = (err) => {
-                    console.error('Proje dosyası okuma hatası:', err);
-                    updateStatus('Hata: Proje dosyası okunamadı');
+                    console.error('Fehler beim Lesen der Projektdatei:', err);
+                    updateStatus('Fehler: Projektdatei konnte nicht gelesen werden');
                 };
                 reader.readAsText(file);
                 e.target.value = '';
             } catch (err) {
-                console.error('Proje yükleme hatası:', err);
-                updateStatus('Hata: Proje yüklenemedi');
+                console.error('Fehler beim Laden des Projekts:', err);
+                updateStatus('Fehler: Projekt konnte nicht geladen werden');
             }
         }
 
@@ -500,13 +504,13 @@
                     elements.pdfFileInput.disabled = false;
                     elements.exportJsonBtn.disabled = false;
                     elements.exportCsvBtn.disabled = false;
-                    updateStatus(`Etiket "${labelName}" eklendi`);
+                    updateStatus(`Beschriftung "${labelName}" hinzugefügt`);
                 } else {
-                    updateStatus('Hata: Etiket adı boş veya zaten mevcut');
+                    updateStatus('Fehler: Beschriftungsname leer oder bereits vorhanden');
                 }
             } catch (err) {
-                console.error('Etiket ekleme hatası:', err);
-                updateStatus('Hata: Etiket eklenemedi');
+                console.error('Fehler beim Hinzufügen der Beschriftung:', err);
+                updateStatus('Fehler: Beschriftung konnte nicht hinzugefügt werden');
             }
         }
 
@@ -520,7 +524,7 @@
                         <div class="label-color" style="background: ${color};"></div>
                         <span>${name}</span>
                     </div>
-                    <button class="btn btn-danger" onclick="deleteLabel('${name}')">Sil</button>
+                    <button class="btn btn-danger" onclick="deleteLabel('${name}')">Löschen</button>
                 `;
                 item.addEventListener('click', (e) => {
                     if (!e.target.classList.contains('btn')) {
@@ -529,7 +533,7 @@
                         elements.labelModeBtn.classList.add('active');
                         elements.eraserModeBtn.classList.remove('active');
                         renderLabels();
-                        updateStatus(`Aktif etiket: ${name}`);
+                        updateStatus(`Aktive Beschriftung: ${name}`);
                     }
                 });
                 elements.labelList.appendChild(item);
@@ -538,213 +542,68 @@
 
         window.deleteLabel = function(name) {
             try {
-                if (confirm(`"${name}" etiketini silmek istediğinizden emin misiniz?`)) {
+                if (confirm(`Möchten Sie die Beschriftung "${name}" wirklich löschen?`)) {
                     delete projectData.classes[name];
                     if (projectData.activeLabel === name) {
                         projectData.activeLabel = null;
                     }
                     renderLabels();
-                    updateStatus(`Etiket "${name}" silindi`);
+                    updateStatus(`Beschriftung "${name}" gelöscht`);
                 }
             } catch (err) {
-                console.error('Etiket silme hatası:', err);
-                updateStatus('Hata: Etiket silinemedi');
+                console.error('Fehler beim Löschen der Beschriftung:', err);
+                updateStatus('Fehler: Beschriftung konnte nicht gelöscht werden');
             }
         };
 
-        async function fetchPdfList() {
-    try {
-        const response = await fetch('/.netlify/functions/list-pdfs');
-        if (!response.ok) throw new Error('PDF listesi alınamadı');
-        const files = await response.json();
-        return files;
-    } catch (err) {
-        console.error('PDF listesi alınamadı:', err);
-        updateStatus('Hata: PDF listesi yüklenemedi');
-        return [];
-    }
-}
-
-async function checkJsonExists(pdfName) {
-    try {
-        const jsonName = pdfName.replace('.pdf', '.json');
-        const response = await fetch(`/.netlify/functions/check-json?file=${jsonName}`);
-        return response.ok;
-    } catch (err) {
-        return false;
-    }
-}
-
-async function renderPdfList() {
-    elements.pdfList.innerHTML = '';
-    const pdfFiles = await fetchPdfList();
-    for (const fileName of pdfFiles) {
-        const hasJson = await checkJsonExists(fileName);
-        const item = document.createElement('div');
-        item.className = `pdf-item ${currentPdfFile === fileName ? 'active' : ''}`;
-        item.innerHTML = `
-            <span style="flex: 1;">${fileName} ${hasJson ? '✔' : ''}</span>
-            <button class="btn btn-danger" onclick="deletePdf('${fileName}')">Sil</button>
-        `;
-        item.querySelector('span').addEventListener('click', async () => {
-            console.log('PDF seçildi:', fileName);
-            await loadPdf(fileName);
-        });
-        elements.pdfList.appendChild(item);
-    }
-    await renderProgressBar();
-}
-
-async function loadPdf(fileName) {
-    if (!projectData.files[fileName]) {
-        try {
-            const response = await fetch(`/pdfs/${fileName}`);
-            if (!response.ok) throw new Error('PDF indirilemedi');
-            const arrayBuffer = await response.arrayBuffer();
-            projectData.files[fileName] = {
-                annotations: {},
-                pdfData: arrayBuffer,
-                numPages: 0
-            };
-            Object.keys(projectData.classes).forEach(label => {
-                projectData.files[fileName].annotations[label] = [];
-            });
-            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer, disableCache: true });
-            const pdf = await loadingTask.promise;
-            projectData.files[fileName].numPages = pdf.numPages;
-            currentPdfFile = fileName;
-            currentPage = 1;
-            renderPdfList();
-            updateStatus(`PDF "${fileName}" yükleniyor...`);
-            await renderPage(1);
-            await loadAnnotations(fileName);
-            updateStatus(`PDF "${fileName}" yüklendi`);
-        } catch (err) {
-            console.error(`PDF yükleme hatası (${fileName}):`, err);
-            updateStatus(`Hata: "${fileName}" yüklenemedi`);
-        }
-    } else {
-        currentPdfFile = fileName;
-        currentPage = 1;
-        renderPdfList();
-        await renderPage(1);
-        await loadAnnotations(fileName);
-        updateStatus(`PDF "${fileName}" yüklendi`);
-    }
-}
-
-async function loadAnnotations(fileName) {
-    try {
-        const jsonName = fileName.replace('.pdf', '.json');
-        const response = await fetch(`/.netlify/functions/check-json?file=${jsonName}`);
-        if (response.ok) {
-            const data = await response.json();
-            projectData.files[fileName].annotations = data.files[fileName] || {};
-            restoreAnnotations(document.querySelector('#pdfDisplay > div'), currentPage);
-            updateStatus(`"${fileName}" için etiketler yüklendi`);
-        } else {
-            Object.keys(projectData.classes).forEach(label => {
-                if (!projectData.files[fileName].annotations[label]) {
+        async function uploadPdf(e) {
+            if (typeof pdfjsLib === 'undefined') {
+                updateStatus('Fehler: PDF.js-Bibliothek nicht geladen');
+                return;
+            }
+            try {
+                const file = e.target.files[0];
+                if (!file) {
+                    updateStatus('Fehler: Keine Datei ausgewählt');
+                    return;
+                }
+                
+                const fileName = file.name;
+                projectData.files[fileName] = { 
+                    annotations: {}, 
+                    pdfData: null,
+                    numPages: 0
+                };
+                Object.keys(projectData.classes).forEach(label => {
                     projectData.files[fileName].annotations[label] = [];
-                }
-            });
-        }
-    } catch (err) {
-        console.error('Etiket yükleme hatası:', err);
-        updateStatus('Hata: Etiketler yüklenemedi');
-    }
-}
-
-async function exportJson() {
-    try {
-        const exportData = {
-            project_name: projectData.name,
-            date: projectData.date,
-            classes: projectData.classes,
-            files: { [currentPdfFile]: projectData.files[currentPdfFile].annotations }
-        };
-        const pdfName = currentPdfFile.replace('.pdf', '');
-        const jsonName = `${pdfName}.json`;
-        const response = await fetch('/.netlify/functions/save-json', {
-            method: 'POST',
-            body: JSON.stringify({ fileName: jsonName, data: exportData })
-        });
-        if (response.ok) {
-            updateStatus('JSON kaydedildi');
-            renderPdfList();
-        } else {
-            throw new Error('JSON kaydetme hatası');
-        }
-    } catch (err) {
-        console.error('JSON dışa aktarma hatası:', err);
-        updateStatus('Hata: JSON kaydedilemedi');
-    }
-}
-
-async function renderProgressBar() {
-    const pdfFiles = await fetchPdfList();
-    let completedCount = 0;
-    for (const fileName of pdfFiles) {
-        if (await checkJsonExists(fileName)) {
-            completedCount++;
-        }
-    }
-    const totalCount = pdfFiles.length;
-    const percentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
-
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['İlerleme'],
-            datasets: [{
-                label: 'Tamamlanan PDF\'ler',
-                data: [percentage],
-                backgroundColor: '#28a745',
-                borderColor: '#1e7e34',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Tamamlanma Yüzdesi (%)'
+                });
+                
+                const reader = new FileReader();
+                reader.onload = async (event) => {
+                    try {
+                        projectData.files[fileName].pdfData = event.target.result;
+                        const loadingTask = pdfjsLib.getDocument({ data: event.target.result, disableCache: true });
+                        const pdf = await loadingTask.promise;
+                        projectData.files[fileName].numPages = pdf.numPages;
+                        renderPdfList();
+                        updateStatus(`PDF "${fileName}" hochgeladen`);
+                        await loadPdf(fileName);
+                    } catch (err) {
+                        console.error(`Fehler beim Hochladen des PDFs (${fileName}):`, err);
+                        updateStatus(`Fehler: "${fileName}" konnte nicht hochgeladen werden`);
                     }
-                },
-                y: {
-                    display: false
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.raw.toFixed(2)}% (${completedCount}/${totalCount} PDF)`;
-                        }
-                    }
-                }
+                };
+                reader.onerror = (err) => {
+                    console.error(`Fehler beim Lesen der Datei (${fileName}):`, err);
+                    updateStatus(`Fehler: "${fileName}" konnte nicht gelesen werden`);
+                };
+                reader.readAsArrayBuffer(file);
+                e.target.value = '';
+            } catch (err) {
+                console.error('Fehler beim Hochladen des PDFs:', err);
+                updateStatus('Fehler: PDF konnte nicht hochgeladen werden');
             }
         }
-    });
-}
-
-document.getElementById('refreshListBtn').addEventListener('click', () => {
-    renderPdfList();
-    updateStatus('PDF listesi yenilendi');
-});
-
-// Otomatik yenileme (isteğe bağlı)
-setInterval(() => {
-    renderPdfList();
-}, 30000);
 
         function renderPdfList() {
             elements.pdfList.innerHTML = '';
@@ -753,10 +612,10 @@ setInterval(() => {
                 item.className = `pdf-item ${currentPdfFile === fileName ? 'active' : ''}`;
                 item.innerHTML = `
                     <span style="flex: 1;">${fileName}</span>
-                    <button class="btn btn-danger" onclick="deletePdf('${fileName}')">Sil</button>
+                    <button class="btn btn-danger" onclick="deletePdf('${fileName}')">Löschen</button>
                 `;
                 item.querySelector('span').addEventListener('click', async () => {
-                    console.log('PDF seçildi:', fileName);
+                    console.log('PDF ausgewählt:', fileName);
                     await loadPdf(fileName);
                 });
                 elements.pdfList.appendChild(item);
@@ -765,29 +624,29 @@ setInterval(() => {
 
         window.deletePdf = function(fileName) {
             try {
-                if (confirm(`"${fileName}" dosyasını silmek istediğinizden emin misiniz?`)) {
+                if (confirm(`Möchten Sie die Datei "${fileName}" wirklich löschen?`)) {
                     delete projectData.files[fileName];
                     if (currentPdfFile === fileName) {
                         currentPdfFile = null;
                         currentPdfDoc = null;
-                        elements.pdfDisplay.innerHTML = 'PDF bekleniyor...';
+                        elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
                     }
                     renderPdfList();
-                    updateStatus('PDF silindi');
+                    updateStatus('PDF gelöscht');
                 }
             } catch (err) {
-                console.error('PDF silme hatası:', err);
-                updateStatus('Hata: PDF silinemedi');
+                console.error('Fehler beim Löschen des PDFs:', err);
+                updateStatus('Fehler: PDF konnte nicht gelöscht werden');
             }
         };
 
         async function loadPdf(fileName) {
             if (typeof pdfjsLib === 'undefined') {
-                updateStatus('Hata: PDF.js kütüphanesi yüklü değil');
+                updateStatus('Fehler: PDF.js-Bibliothek nicht geladen');
                 return;
             }
             if (!projectData.files[fileName] || !projectData.files[fileName].pdfData) {
-                updateStatus(`Hata: "${fileName}" dosyası bulunamadı`);
+                updateStatus(`Fehler: Datei "${fileName}" nicht gefunden`);
                 return;
             }
             try {
@@ -798,18 +657,18 @@ setInterval(() => {
                 currentPdfFile = fileName;
                 currentPage = 1;
                 renderPdfList();
-                updateStatus(`PDF "${fileName}" yükleniyor...`);
+                updateStatus(`PDF "${fileName}" wird geladen...`);
                 await renderPage(1);
-                updateStatus(`PDF "${fileName}" yüklendi`);
+                updateStatus(`PDF "${fileName}" geladen`);
             } catch (err) {
-                console.error(`PDF yükleme hatası (${fileName}):`, err);
-                updateStatus(`Hata: "${fileName}" yüklenemedi`);
+                console.error(`Fehler beim Laden des PDFs (${fileName}):`, err);
+                updateStatus(`Fehler: "${fileName}" konnte nicht geladen werden`);
             }
         }
 
         async function renderPage(pageNum) {
             if (!currentPdfFile) {
-                updateStatus('Hata: Hiçbir PDF seçili değil');
+                updateStatus('Fehler: Kein PDF ausgewählt');
                 return;
             }
             try {
@@ -825,13 +684,13 @@ setInterval(() => {
 
                 elements.pdfDisplay.innerHTML = '';
                 
-                // Sayfa kontrolleri ekle
+                // Seite kontrollieren
                 const controls = document.createElement('div');
                 controls.style.cssText = 'display: flex; gap: 10px; margin-bottom: 15px; align-items: center; justify-content: center;';
                 controls.innerHTML = `
-                    <button class="btn btn-primary" id="prevPageBtn" ${pageNum <= 1 ? 'disabled' : ''}>◀ Önceki</button>
-                    <span style="font-weight: bold; min-width: 120px; text-align: center;">Sayfa ${pageNum} / ${currentPdfDoc.numPages}</span>
-                    <button class="btn btn-primary" id="nextPageBtn" ${pageNum >= currentPdfDoc.numPages ? 'disabled' : ''}>Sonraki ▶</button>
+                    <button class="btn btn-primary" id="prevPageBtn" ${pageNum <= 1 ? 'disabled' : ''}>◀ Vorherige</button>
+                    <span style="font-weight: bold; min-width: 120px; text-align: center;">Seite ${pageNum} / ${currentPdfDoc.numPages}</span>
+                    <button class="btn btn-primary" id="nextPageBtn" ${pageNum >= currentPdfDoc.numPages ? 'disabled' : ''}>Nächste ▶</button>
                 `;
                 elements.pdfDisplay.appendChild(controls);
                 
@@ -861,11 +720,11 @@ setInterval(() => {
                     setupTextInteractivity(textLayer, pageNum);
                     restoreAnnotations(container, pageNum);
                 }).catch(err => {
-                    console.error('Metin katmanı yükleme hatası:', err);
-                    updateStatus('Uyarı: PDF metin içermiyor');
+                    console.error('Fehler beim Laden der Textschicht:', err);
+                    updateStatus('Warnung: PDF enthält keinen Text');
                 });
                 
-                // Sayfa değiştirme butonları
+                // Seite wechseln
                 document.getElementById('prevPageBtn').addEventListener('click', () => {
                     if (currentPage > 1) {
                         renderPage(currentPage - 1);
@@ -878,10 +737,10 @@ setInterval(() => {
                     }
                 });
                 
-                updateStatus(`Sayfa ${pageNum}/${currentPdfDoc.numPages} görüntüleniyor`);
+                updateStatus(`Seite ${pageNum}/${currentPdfDoc.numPages} wird angezeigt`);
             } catch (err) {
-                console.error('Sayfa görüntüleme hatası:', err);
-                updateStatus('Hata: PDF sayfası görüntülenemedi');
+                console.error('Fehler beim Anzeigen der Seite:', err);
+                updateStatus('Fehler: PDF-Seite konnte nicht angezeigt werden');
             }
         }
 
@@ -894,7 +753,7 @@ setInterval(() => {
                 span.dataset.id = spanId;
                 textSpanMap.set(spanId, { text, page: pageNum });
 
-                // Sol tıklama
+                // Linksklick
                 span.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (projectData.isEraser) {
@@ -902,12 +761,12 @@ setInterval(() => {
                     } else if (projectData.activeLabel) {
                         addAnnotationById(spanId, pageNum, 1);
                     } else {
-                        updateStatus('Hata: Etiket seçilmedi');
+                        updateStatus('Fehler: Keine Beschriftung ausgewählt');
                     }
                     restoreAnnotations(textLayer.parentElement, pageNum);
                 });
 
-                // Sağ tıklama - grup menüsü
+                // Rechtsklick - Gruppenmenü
                 span.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -930,7 +789,7 @@ setInterval(() => {
 
         function addAnnotationById(spanId, pageNum, group) {
             try {
-                // Önce tüm etiketlerden bu span'ı kaldır
+                // Zuerst alle Beschriftungen für diesen Span entfernen
                 Object.keys(projectData.classes).forEach(label => {
                     const annotations = projectData.files[currentPdfFile].annotations[label] || [];
                     projectData.files[currentPdfFile].annotations[label] = annotations.filter(
@@ -938,7 +797,7 @@ setInterval(() => {
                     );
                 });
                 
-                // Yeni etikete ekle
+                // Zur neuen Beschriftung hinzufügen
                 if (!projectData.files[currentPdfFile].annotations[projectData.activeLabel]) {
                     projectData.files[currentPdfFile].annotations[projectData.activeLabel] = [];
                 }
@@ -948,8 +807,8 @@ setInterval(() => {
                     group: group || 1
                 });
             } catch (err) {
-                console.error('Etiketleme hatası:', err);
-                updateStatus('Hata: Etiket eklenemedi');
+                console.error('Fehler beim Beschriftung:', err);
+                updateStatus('Fehler: Beschriftung konnte nicht hinzugefügt werden');
             }
         }
 
@@ -962,8 +821,8 @@ setInterval(() => {
                     );
                 });
             } catch (err) {
-                console.error('Etiket silme hatası:', err);
-                updateStatus('Hata: Etiket silinemedi');
+                console.error('Fehler beim Entfernen der Beschriftung:', err);
+                updateStatus('Fehler: Beschriftung konnte nicht entfernt werden');
             }
         }
 
@@ -976,7 +835,7 @@ setInterval(() => {
         }
 
         function showContextMenu(x, y, spanId, pageNum, annotation) {
-            // Eski menüyü kaldır
+            // Altes Menü entfernen
             const existingMenu = document.querySelector('.context-menu');
             if (existingMenu) existingMenu.remove();
 
@@ -986,11 +845,11 @@ setInterval(() => {
             menu.style.top = y + 'px';
             menu.innerHTML = `
                 <div class="context-menu-item" data-action="change-group">
-                    Grup Değiştir (Şu an: ${annotation.group || 1})
+                    Gruppe ändern (Aktuell: ${annotation.group || 1})
                 </div>
                 <div class="context-menu-divider"></div>
                 <div class="context-menu-item" data-action="remove">
-                    Etiketi Kaldır
+                    Beschriftung entfernen
                 </div>
             `;
 
@@ -1015,11 +874,11 @@ setInterval(() => {
             const dialog = document.createElement('div');
             dialog.className = 'group-input-dialog';
             dialog.innerHTML = `
-                <h3>Grup Numarası Ata</h3>
-                <input type="number" id="groupInput" min="1" value="${annotation.group || 1}" placeholder="Grup numarası (1, 2, 3...)">
+                <h3>Gruppennummer zuweisen</h3>
+                <input type="number" id="groupInput" min="1" value="${annotation.group || 1}" placeholder="Gruppennummer (1, 2, 3...)">
                 <div class="group-input-dialog-buttons">
-                    <button class="btn btn-primary" id="groupOkBtn">Tamam</button>
-                    <button class="btn btn-danger" id="groupCancelBtn">İptal</button>
+                    <button class="btn btn-primary" id="groupOkBtn">OK</button>
+                    <button class="btn btn-danger" id="groupCancelBtn">Abbrechen</button>
                 </div>
             `;
 
@@ -1055,16 +914,16 @@ setInterval(() => {
                 const ann = annotations.find(a => a.spanId === spanId);
                 if (ann) {
                     ann.group = newGroup;
-                    updateStatus(`Grup ${newGroup} olarak değiştirildi`);
+                    updateStatus(`Gruppe auf ${newGroup} geändert`);
                 }
             } catch (err) {
-                console.error('Grup değiştirme hatası:', err);
-                updateStatus('Hata: Grup değiştirilemedi');
+                console.error('Fehler beim Ändern der Gruppe:', err);
+                updateStatus('Fehler: Gruppe konnte nicht geändert werden');
             }
         }
 
         function restoreAnnotations(container, pageNum) {
-            // Eski highlight'ları ve badge'leri temizle
+            // Alte Highlights und Badges entfernen
             const existingHighlights = container.querySelectorAll('.annotation-highlight');
             const existingBadges = container.querySelectorAll('.group-badge');
             existingHighlights.forEach(h => h.remove());
@@ -1092,7 +951,7 @@ setInterval(() => {
                         highlight.style.borderColor = color;
                         container.appendChild(highlight);
 
-                        // Grup badge ekle (grup 2 ve üzeri için)
+                        // Gruppenbadge hinzufügen (für Gruppe 2 und höher)
                         if (ann.group && ann.group > 1) {
                             const badge = document.createElement('div');
                             badge.className = 'group-badge';
@@ -1122,7 +981,7 @@ setInterval(() => {
                     Object.entries(projectData.classes).forEach(([label]) => {
                         const annotations = data.annotations[label] || [];
                         
-                        // Gruplara ayır
+                        // In Gruppen aufteilen
                         const groups = {};
                         annotations.forEach(ann => {
                             const groupNum = ann.group || 1;
@@ -1135,15 +994,15 @@ setInterval(() => {
                             }
                         });
                         
-                        // Her grubu ayrı anahtar olarak ekle
+                        // Jede Gruppe als separater Schlüssel hinzufügen
                         Object.entries(groups).forEach(([groupNum, texts]) => {
-                            const key = groupNum > 1 ? `${label}_Grup${groupNum}` : label;
+                            const key = groupNum > 1 ? `${label}_Gruppe${groupNum}` : label;
                             exportData.files[fileName][key] = texts;
                         });
                     });
                 });
                 
-                // PDF adını al (uzantısız)
+                // PDF-Name ohne Erweiterung
                 const pdfName = currentPdfFile ? currentPdfFile.replace('.pdf', '') : projectData.name || 'export';
                 
                 const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
@@ -1153,22 +1012,22 @@ setInterval(() => {
                 a.download = `${pdfName}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                updateStatus('JSON olarak dışa aktarıldı');
+                updateStatus('Als JSON exportiert');
             } catch (err) {
-                console.error('JSON dışa aktarma hatası:', err);
-                updateStatus('Hata: JSON dışa aktarılamadı');
+                console.error('Fehler beim JSON-Export:', err);
+                updateStatus('Fehler: JSON konnte nicht exportiert werden');
             }
         }
 
         function exportCsv() {
             try {
-                let csv = 'PDF Dosyası,Etiket,Değer\n';
+                let csv = 'PDF-Datei,Beschriftung,Wert\n';
                 
                 Object.entries(projectData.files).forEach(([fileName, data]) => {
                     Object.entries(projectData.classes).forEach(([label]) => {
                         const annotations = data.annotations[label] || [];
                         
-                        // Gruplara ayır
+                        // In Gruppen aufteilen
                         const groups = {};
                         annotations.forEach(ann => {
                             const groupNum = ann.group || 1;
@@ -1181,16 +1040,16 @@ setInterval(() => {
                             }
                         });
                         
-                        // Her grubu ayrı satır olarak ekle
+                        // Jede Gruppe als separate Zeile hinzufügen
                         Object.entries(groups).forEach(([groupNum, texts]) => {
-                            const key = groupNum > 1 ? `${label}_Grup${groupNum}` : label;
+                            const key = groupNum > 1 ? `${label}_Gruppe${groupNum}` : label;
                             const value = texts.join(' ');
                             csv += `"${fileName}","${key}","${value}"\n`;
                         });
                     });
                 });
                 
-                // PDF adını al (uzantısız)
+                // PDF-Name ohne Erweiterung
                 const pdfName = currentPdfFile ? currentPdfFile.replace('.pdf', '') : projectData.name || 'export';
                 
                 const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1200,15 +1059,15 @@ setInterval(() => {
                 a.download = `${pdfName}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
-                updateStatus('CSV olarak dışa aktarıldı');
+                updateStatus('Als CSV exportiert');
             } catch (err) {
-                console.error('CSV dışa aktarma hatası:', err);
-                updateStatus('Hata: CSV dışa aktarılamadı');
+                console.error('Fehler beim CSV-Export:', err);
+                updateStatus('Fehler: CSV konnte nicht exportiert werden');
             }
         }
 
         function updateStatus(message) {
-            elements.statusText.textContent = `Durum: ${message}`;
+            elements.statusText.textContent = `Status: ${message}`;
         }
     </script>
 </body>
