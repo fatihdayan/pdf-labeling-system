@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF-Beschriftungssystem</title>
-    <!-- Yerel PDF.js kütüphanesi -->
+    <!-- Lokale PDF.js Bibliothek -->
     <script src="lib/pdf.min.js"></script>
     <style>
         * {
@@ -12,11 +13,13 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
             font-family: Arial, sans-serif;
             background: #f0f0f0;
             padding: 20px;
         }
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -24,20 +27,24 @@
             padding: 20px;
             border-radius: 8px;
         }
+
         .main-content {
             display: flex;
             min-height: 600px;
         }
+
         .sidebar {
             width: 300px;
             padding: 20px;
             background: #f8f9fa;
             border-right: 1px solid #ddd;
         }
+
         .workspace {
             flex: 1;
             padding: 20px;
         }
+
         .btn {
             padding: 10px 20px;
             border: none;
@@ -45,43 +52,54 @@
             cursor: pointer;
             margin: 5px;
         }
+
         .btn-primary {
             background: #667eea;
             color: white;
         }
+
         .btn-success {
             background: #28a745;
             color: white;
         }
+
         .btn-danger {
             background: #dc3545;
             color: white;
         }
+
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
+
         .input-group {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
         }
+
         .input-group input[type="text"] {
             flex: 1;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         .input-group input[type="color"] {
             width: 40px;
             height: 36px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-        .label-list, .pdf-list {
+
+        .label-list,
+        .pdf-list {
             margin-top: 10px;
         }
-        .label-item, .pdf-item {
+
+        .label-item,
+        .pdf-item {
             padding: 10px;
             border: 1px solid #ddd;
             margin-bottom: 5px;
@@ -90,24 +108,26 @@
             justify-content: space-between;
             align-items: center;
         }
-        .label-item.active, .pdf-item.active {
+
+        .label-item.active,
+        .pdf-item.active {
             background: #e6f0ff;
         }
+
         .label-color {
             width: 20px;
             height: 20px;
             border-radius: 50%;
             border: 1px solid #ddd;
         }
+
         #pdfDisplay {
             border: 2px dashed #ddd;
             padding: 20px;
             min-height: 400px;
             margin-top: 20px;
         }
-        #pdfCanvas {
-            max-width: 100%;
-        }
+
         .text-layer {
             position: absolute;
             top: 0;
@@ -117,16 +137,19 @@
             opacity: 0.2;
             z-index: 10;
         }
-        .text-layer > span {
+
+        .text-layer>span {
             color: transparent;
             position: absolute;
             cursor: pointer;
             border-radius: 3px;
         }
-        .text-layer > span:hover {
+
+        .text-layer>span:hover {
             background: rgba(102, 126, 234, 0.3);
             opacity: 1;
         }
+
         .annotation-highlight {
             position: absolute;
             background: rgba(102, 126, 234, 0.3);
@@ -134,6 +157,7 @@
             pointer-events: none;
             z-index: 5;
         }
+
         .group-badge {
             position: absolute;
             background: white;
@@ -151,49 +175,59 @@
             top: -5px;
             right: -5px;
         }
+
         .mode-toggle {
             display: flex;
             gap: 10px;
             margin-top: 10px;
         }
+
         .mode-btn {
             flex: 1;
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 5px;
             cursor: pointer;
+            background: white;
         }
+
         .mode-btn.active {
             background: #667eea;
             color: white;
         }
+
         #statusText {
             margin-top: 10px;
             color: #333;
         }
+
         .context-menu {
             position: fixed;
             background: white;
             border: 2px solid #667eea;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             z-index: 1000;
             padding: 5px 0;
             min-width: 200px;
         }
+
         .context-menu-item {
             padding: 10px 15px;
             cursor: pointer;
             transition: background 0.2s;
         }
+
         .context-menu-item:hover {
             background: #f0f3ff;
         }
+
         .context-menu-divider {
             height: 1px;
             background: #ddd;
             margin: 5px 0;
         }
+
         .group-input-dialog {
             position: fixed;
             top: 50%;
@@ -202,15 +236,17 @@
             background: white;
             border: 2px solid #667eea;
             border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             z-index: 1001;
             padding: 20px;
             min-width: 300px;
         }
+
         .group-input-dialog h3 {
             margin-bottom: 15px;
             color: #667eea;
         }
+
         .group-input-dialog input {
             width: 100%;
             padding: 10px;
@@ -218,85 +254,93 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
+
         .group-input-dialog-buttons {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
         }
+
         .overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
-        .footer {
-            margin-top: 20px;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            margin-bottom: 10px;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>PDF-Beschriftungssystem</h1>
         <div class="main-content">
             <div class="sidebar">
-                <div>
+                <div class="section">
                     <h3>Projekt</h3>
-                    <button class="btn btn-primary" id="newProjectBtn">Neues Projekt erstellen</button>
+                    <button class="btn btn-primary" id="newProjectBtn">Neues Projekt</button>
                     <button class="btn btn-success" id="saveProjectBtn" disabled>Projekt speichern</button>
                     <button class="btn btn-primary" id="loadProjectBtn">Projekt laden</button>
                     <input type="file" id="projectFileInput" accept=".json" style="display: none;">
                 </div>
-                <div>
-                    <h3>Beschriftungen</h3>
+                <div class="section">
+                    <h3>Labels</h3>
                     <div class="input-group">
-                        <input type="text" id="labelInput" placeholder="Beschriftungsname" disabled>
+                        <input type="text" id="labelInput" placeholder="Label-Name" disabled>
                         <input type="color" id="colorInput" value="#ff6b6b" disabled>
-                        <button class="btn btn-success" id="addLabelBtn" disabled>Hinzufügen</button>
+                        <button class="btn btn-success" id="addLabelBtn" disabled>+</button>
                     </div>
                     <div class="label-list" id="labelList"></div>
                 </div>
-                <div>
+                <div class="section">
                     <h3>Modus</h3>
                     <div class="mode-toggle">
-                        <button class="mode-btn active" id="labelModeBtn">Beschriftung</button>
+                        <button class="mode-btn active" id="labelModeBtn">Beschriften</button>
                         <button class="mode-btn" id="eraserModeBtn">Radierer</button>
                     </div>
                 </div>
-                <div>
+                <div class="section">
                     <h3>PDF-Datei</h3>
                     <input type="file" id="pdfFileInput" accept=".pdf" style="display: none;" disabled>
                     <button class="btn btn-primary" id="uploadPdfBtn" disabled>PDF hochladen</button>
                     <div class="pdf-list" id="pdfList"></div>
                 </div>
+                <div class="section">
+                    <h3>JSON-Annotationen</h3>
+                    <input type="file" id="jsonFileInput" accept=".json" style="display: none;" disabled>
+                    <button class="btn btn-primary" id="loadJsonBtn" disabled>JSON laden</button>
+                </div>
             </div>
             <div class="workspace">
                 <div>
-                    <h3>PDF-Anzeige</h3>
-                    <div id="pdfDisplay">PDF wird erwartet...</div>
+                    <h3>PDF-Ansicht</h3>
+                    <div id="pdfDisplay">Warten auf PDF...</div>
                 </div>
                 <div>
-                    <h3>Exportieren</h3>
+                    <h3>Export</h3>
                     <button class="btn btn-success" id="exportJsonBtn" disabled>JSON herunterladen</button>
                     <button class="btn btn-success" id="exportCsvBtn" disabled>CSV herunterladen</button>
                 </div>
             </div>
         </div>
         <div id="statusText">Status: Bereit</div>
-        <div class="footer">Entwickelt von Fatih Dayan</div>
     </div>
 
     <script>
-        // PDF.js yüklenmesini kontrol et
         if (typeof pdfjsLib === 'undefined') {
-            console.error('PDF.js-Bibliothek konnte nicht geladen werden. Überprüfen Sie die Datei lib/pdf.min.js.');
-            document.getElementById('statusText').textContent = 'Fehler: PDF.js-Bibliothek konnte nicht geladen werden';
-            alert('PDF.js-Bibliothek konnte nicht geladen werden. Überprüfen Sie die Datei lib/pdf.min.js.');
+            console.error('PDF.js Bibliothek konnte nicht geladen werden');
+            document.getElementById('statusText').textContent = 'Fehler: PDF.js nicht geladen';
+            alert('PDF.js Bibliothek konnte nicht geladen werden. Bitte prüfen Sie lib/pdf.min.js');
         } else {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'lib/pdf.worker.min.js';
         }
@@ -307,14 +351,14 @@
             classes: {},
             files: {},
             activeLabel: null,
-            isEraser: false
+            isEraser: false,
+            classGroups: {}
         };
         let currentPdfFile = null;
         let currentPdfDoc = null;
         let currentPage = 1;
         let textSpanMap = new Map();
 
-        // DOM Elements
         const elements = {
             newProjectBtn: document.getElementById('newProjectBtn'),
             saveProjectBtn: document.getElementById('saveProjectBtn'),
@@ -333,64 +377,45 @@
             exportJsonBtn: document.getElementById('exportJsonBtn'),
             exportCsvBtn: document.getElementById('exportCsvBtn'),
             statusText: document.getElementById('statusText'),
+            loadJsonBtn: document.getElementById('loadJsonBtn'),
+            jsonFileInput: document.getElementById('jsonFileInput')
         };
 
-        // Event Listeners
-        elements.newProjectBtn.addEventListener('click', () => {
-            console.log('Neues Projekt erstellen geklickt');
-            createNewProject();
-        });
-        elements.saveProjectBtn.addEventListener('click', () => {
-            console.log('Projekt speichern geklickt');
-            saveProject();
-        });
-        elements.loadProjectBtn.addEventListener('click', () => {
-            console.log('Projekt laden geklickt');
-            elements.projectFileInput.click();
-        });
-        elements.addLabelBtn.addEventListener('click', () => {
-            console.log('Beschriftung hinzufügen geklickt');
-            addLabel();
-        });
-        elements.uploadPdfBtn.addEventListener('click', () => {
-            console.log('PDF hochladen geklickt');
-            elements.pdfFileInput.click();
-        });
+        elements.newProjectBtn.addEventListener('click', createNewProject);
+        elements.saveProjectBtn.addEventListener('click', saveProject);
+        elements.loadProjectBtn.addEventListener('click', () => elements.projectFileInput.click());
+        elements.addLabelBtn.addEventListener('click', addLabel);
+        elements.uploadPdfBtn.addEventListener('click', () => elements.pdfFileInput.click());
+        elements.loadJsonBtn.addEventListener('click', () => elements.jsonFileInput.click());
+
         elements.labelModeBtn.addEventListener('click', () => {
-            console.log('Beschriftungsmodus ausgewählt');
             projectData.isEraser = false;
             elements.labelModeBtn.classList.add('active');
             elements.eraserModeBtn.classList.remove('active');
             updateStatus(`Aktiver Modus: Beschriftung (${projectData.activeLabel || 'Nicht ausgewählt'})`);
         });
+
         elements.eraserModeBtn.addEventListener('click', () => {
-            console.log('Radierermodus ausgewählt');
             projectData.isEraser = true;
             projectData.activeLabel = null;
             elements.eraserModeBtn.classList.add('active');
             elements.labelModeBtn.classList.remove('active');
             updateStatus('Aktiver Modus: Radierer');
         });
-        elements.exportJsonBtn.addEventListener('click', () => {
-            console.log('JSON herunterladen geklickt');
-            exportJson();
-        });
-        elements.exportCsvBtn.addEventListener('click', () => {
-            console.log('CSV herunterladen geklickt');
-            exportCsv();
-        });
+
+        elements.exportJsonBtn.addEventListener('click', exportJson);
+        elements.exportCsvBtn.addEventListener('click', exportCsv);
         elements.projectFileInput.addEventListener('change', loadProject);
         elements.pdfFileInput.addEventListener('change', uploadPdf);
+        elements.jsonFileInput.addEventListener('change', loadJsonAnnotations);
 
-        // Close context menu on click
         document.addEventListener('click', () => {
-            const menus = document.querySelectorAll('.context-menu');
-            menus.forEach(m => m.remove());
+            document.querySelectorAll('.context-menu').forEach(m => m.remove());
         });
 
         function createNewProject() {
             try {
-                const projectName = prompt('Projektname eingeben:');
+                const projectName = prompt('Bitte geben Sie den Projektnamen ein:');
                 if (projectName) {
                     projectData = {
                         name: projectName,
@@ -398,10 +423,13 @@
                         classes: {},
                         files: {},
                         activeLabel: null,
-                        isEraser: false
+                        isEraser: false,
+                        classGroups: {}
                     };
                     currentPdfFile = null;
                     currentPdfDoc = null;
+                    textSpanMap.clear();
+
                     elements.saveProjectBtn.disabled = false;
                     elements.labelInput.disabled = false;
                     elements.colorInput.disabled = false;
@@ -410,14 +438,17 @@
                     elements.pdfFileInput.disabled = true;
                     elements.exportJsonBtn.disabled = true;
                     elements.exportCsvBtn.disabled = true;
-                    elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
+                    elements.loadJsonBtn.disabled = true;
+                    elements.jsonFileInput.disabled = true;
+
+                    elements.pdfDisplay.innerHTML = 'Warten auf PDF...';
                     elements.pdfList.innerHTML = '';
                     elements.labelList.innerHTML = '';
                     updateStatus(`Neues Projekt "${projectName}" erstellt`);
                 }
             } catch (err) {
-                console.error('Fehler beim Erstellen eines neuen Projekts:', err);
-                updateStatus('Fehler: Neues Projekt konnte nicht erstellt werden');
+                console.error('Fehler beim Erstellen:', err);
+                updateStatus('Fehler: Projekt nicht erstellt');
             }
         }
 
@@ -432,36 +463,38 @@
                 URL.revokeObjectURL(url);
                 updateStatus('Projekt gespeichert');
             } catch (err) {
-                console.error('Fehler beim Speichern des Projekts:', err);
-                updateStatus('Fehler: Projekt konnte nicht gespeichert werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Speichern fehlgeschlagen');
             }
         }
 
         function loadProject(e) {
             try {
                 const file = e.target.files[0];
-                if (!file) {
-                    updateStatus('Fehler: Keine Datei ausgewählt');
-                    return;
-                }
-                console.log('Projektdatei ausgewählt:', file.name);
+                if (!file) return;
+
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     try {
                         const loadedData = JSON.parse(event.target.result);
-                        if (!loadedData.name || !loadedData.date || !loadedData.files || !loadedData.classes) {
-                            throw new Error('Ungültiges Projektdateiformat');
+                        if (!loadedData.name || !loadedData.classes) {
+                            throw new Error('Ungültiges Format');
                         }
+
                         projectData = {
                             name: loadedData.name,
-                            date: loadedData.date,
+                            date: loadedData.date || new Date().toLocaleDateString('de-DE'),
                             classes: loadedData.classes || {},
                             files: loadedData.files || {},
                             activeLabel: null,
-                            isEraser: false
+                            isEraser: false,
+                            classGroups: loadedData.classGroups || {}
                         };
+
                         currentPdfFile = null;
                         currentPdfDoc = null;
+                        textSpanMap.clear();
+
                         elements.saveProjectBtn.disabled = false;
                         elements.labelInput.disabled = false;
                         elements.colorInput.disabled = false;
@@ -470,25 +503,24 @@
                         elements.pdfFileInput.disabled = false;
                         elements.exportJsonBtn.disabled = false;
                         elements.exportCsvBtn.disabled = false;
-                        elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
+                        elements.loadJsonBtn.disabled = false;
+                        elements.jsonFileInput.disabled = false;
+
+                        elements.pdfDisplay.innerHTML = 'Warten auf PDF...';
                         renderLabels();
                         renderPdfList();
                         updateStatus(`Projekt "${projectData.name}" geladen`);
                     } catch (err) {
-                        console.error('Fehler beim Verarbeiten der Projektdatei:', err);
-                        updateStatus('Fehler: Projektdatei konnte nicht geladen werden');
+                        console.error('Fehler:', err);
+                        updateStatus('Fehler: Projekt nicht geladen');
                         alert('Projektdatei konnte nicht geladen werden: ' + err.message);
                     }
-                };
-                reader.onerror = (err) => {
-                    console.error('Fehler beim Lesen der Projektdatei:', err);
-                    updateStatus('Fehler: Projektdatei konnte nicht gelesen werden');
                 };
                 reader.readAsText(file);
                 e.target.value = '';
             } catch (err) {
-                console.error('Fehler beim Laden des Projekts:', err);
-                updateStatus('Fehler: Projekt konnte nicht geladen werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Laden fehlgeschlagen');
             }
         }
 
@@ -496,112 +528,130 @@
             try {
                 const labelName = elements.labelInput.value.trim();
                 const labelColor = elements.colorInput.value;
+
                 if (labelName && !projectData.classes[labelName]) {
                     projectData.classes[labelName] = labelColor;
+                    projectData.classGroups[labelName] = null;
                     renderLabels();
                     elements.labelInput.value = '';
                     elements.uploadPdfBtn.disabled = false;
                     elements.pdfFileInput.disabled = false;
                     elements.exportJsonBtn.disabled = false;
                     elements.exportCsvBtn.disabled = false;
-                    updateStatus(`Beschriftung "${labelName}" hinzugefügt`);
+                    elements.loadJsonBtn.disabled = false;
+                    elements.jsonFileInput.disabled = false;
+                    updateStatus(`Label "${labelName}" hinzugefügt`);
                 } else {
-                    updateStatus('Fehler: Beschriftungsname leer oder bereits vorhanden');
+                    updateStatus('Fehler: Label leer oder existiert');
                 }
             } catch (err) {
-                console.error('Fehler beim Hinzufügen der Beschriftung:', err);
-                updateStatus('Fehler: Beschriftung konnte nicht hinzugefügt werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Label nicht hinzugefügt');
             }
         }
 
         function renderLabels() {
             elements.labelList.innerHTML = '';
             Object.entries(projectData.classes).forEach(([name, color]) => {
+                const currentGroup = projectData.classGroups[name] ?? '';
                 const item = document.createElement('div');
                 item.className = `label-item ${projectData.activeLabel === name ? 'active' : ''}`;
                 item.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                         <div class="label-color" style="background: ${color};"></div>
-                        <span>${name}</span>
+                        <span style="flex: 1;">${name}</span>
+                        <input type="number" min="1" placeholder="Gruppe" value="${currentGroup}"
+                               style="width: 60px; padding: 4px; font-size: 12px; border: 1px solid #ccc; border-radius: 4px;"
+                               data-label="${name}" class="label-group-input">
                     </div>
-                    <button class="btn btn-danger" onclick="deleteLabel('${name}')">Löschen</button>
+                    <button class="btn btn-danger" style="padding: 5px 10px;">×</button>
                 `;
+
+                const groupInput = item.querySelector('.label-group-input');
+                groupInput.addEventListener('change', (e) => {
+                    const val = parseInt(e.target.value) || null;
+                    projectData.classGroups[name] = val;
+                    updateStatus(`Gruppe für "${name}": ${val ?? 'keine'}`);
+                });
+
+                const deleteBtn = item.querySelector('.btn-danger');
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteLabel(name);
+                });
+
                 item.addEventListener('click', (e) => {
-                    if (!e.target.classList.contains('btn')) {
+                    if (!e.target.classList.contains('btn') && !e.target.classList.contains('label-group-input')) {
                         projectData.activeLabel = name;
                         projectData.isEraser = false;
                         elements.labelModeBtn.classList.add('active');
                         elements.eraserModeBtn.classList.remove('active');
                         renderLabels();
-                        updateStatus(`Aktive Beschriftung: ${name}`);
+                        const grp = projectData.classGroups[name];
+                        updateStatus(`Aktives Label: ${name} (Gruppe: ${grp ?? 'keine'})`);
                     }
                 });
                 elements.labelList.appendChild(item);
             });
         }
 
-        window.deleteLabel = function(name) {
+        function deleteLabel(name) {
             try {
-                if (confirm(`Möchten Sie die Beschriftung "${name}" wirklich löschen?`)) {
+                if (confirm(`Möchten Sie das Label "${name}" wirklich löschen?`)) {
                     delete projectData.classes[name];
                     if (projectData.activeLabel === name) {
                         projectData.activeLabel = null;
                     }
+                    delete projectData.classGroups[name];
                     renderLabels();
-                    updateStatus(`Beschriftung "${name}" gelöscht`);
+                    updateStatus(`Label "${name}" gelöscht`);
                 }
             } catch (err) {
-                console.error('Fehler beim Löschen der Beschriftung:', err);
-                updateStatus('Fehler: Beschriftung konnte nicht gelöscht werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Löschen fehlgeschlagen');
             }
-        };
+        }
 
         async function uploadPdf(e) {
             if (typeof pdfjsLib === 'undefined') {
-                updateStatus('Fehler: PDF.js-Bibliothek nicht geladen');
+                updateStatus('Fehler: PDF.js nicht geladen');
                 return;
             }
             try {
                 const file = e.target.files[0];
-                if (!file) {
-                    updateStatus('Fehler: Keine Datei ausgewählt');
-                    return;
-                }
-                
+                if (!file) return;
+
                 const fileName = file.name;
-                projectData.files[fileName] = { 
-                    annotations: {}, 
+                projectData.files[fileName] = {
+                    annotations: {},
                     pdfData: null,
                     numPages: 0
                 };
+
                 Object.keys(projectData.classes).forEach(label => {
                     projectData.files[fileName].annotations[label] = [];
                 });
-                
+
                 const reader = new FileReader();
                 reader.onload = async (event) => {
                     try {
                         projectData.files[fileName].pdfData = event.target.result;
-                        const loadingTask = pdfjsLib.getDocument({ data: event.target.result, disableCache: true });
+                        const loadingTask = pdfjsLib.getDocument({ data: event.target.result });
                         const pdf = await loadingTask.promise;
                         projectData.files[fileName].numPages = pdf.numPages;
                         renderPdfList();
                         updateStatus(`PDF "${fileName}" hochgeladen`);
                         await loadPdf(fileName);
                     } catch (err) {
-                        console.error(`Fehler beim Hochladen des PDFs (${fileName}):`, err);
-                        updateStatus(`Fehler: "${fileName}" konnte nicht hochgeladen werden`);
+                        console.error('Fehler:', err);
+                        updateStatus(`Fehler: "${fileName}" nicht geladen`);
                     }
-                };
-                reader.onerror = (err) => {
-                    console.error(`Fehler beim Lesen der Datei (${fileName}):`, err);
-                    updateStatus(`Fehler: "${fileName}" konnte nicht gelesen werden`);
                 };
                 reader.readAsArrayBuffer(file);
                 e.target.value = '';
             } catch (err) {
-                console.error('Fehler beim Hochladen des PDFs:', err);
-                updateStatus('Fehler: PDF konnte nicht hochgeladen werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: PDF nicht hochgeladen');
             }
         }
 
@@ -611,42 +661,44 @@
                 const item = document.createElement('div');
                 item.className = `pdf-item ${currentPdfFile === fileName ? 'active' : ''}`;
                 item.innerHTML = `
-                    <span style="flex: 1;">${fileName}</span>
-                    <button class="btn btn-danger" onclick="deletePdf('${fileName}')">Löschen</button>
+                    <span style="flex: 1; cursor: pointer;">${fileName}</span>
+                    <button class="btn btn-danger" style="padding: 5px 10px;">×</button>
                 `;
-                item.querySelector('span').addEventListener('click', async () => {
-                    console.log('PDF ausgewählt:', fileName);
-                    await loadPdf(fileName);
+                item.querySelector('span').addEventListener('click', () => loadPdf(fileName));
+                item.querySelector('.btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deletePdf(fileName);
                 });
                 elements.pdfList.appendChild(item);
             });
         }
 
-        window.deletePdf = function(fileName) {
+        function deletePdf(fileName) {
             try {
-                if (confirm(`Möchten Sie die Datei "${fileName}" wirklich löschen?`)) {
+                if (confirm(`Möchten Sie "${fileName}" wirklich löschen?`)) {
                     delete projectData.files[fileName];
                     if (currentPdfFile === fileName) {
                         currentPdfFile = null;
                         currentPdfDoc = null;
-                        elements.pdfDisplay.innerHTML = 'PDF wird erwartet...';
+                        textSpanMap.clear();
+                        elements.pdfDisplay.innerHTML = 'Warten auf PDF...';
                     }
                     renderPdfList();
                     updateStatus('PDF gelöscht');
                 }
             } catch (err) {
-                console.error('Fehler beim Löschen des PDFs:', err);
-                updateStatus('Fehler: PDF konnte nicht gelöscht werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Löschen fehlgeschlagen');
             }
-        };
+        }
 
         async function loadPdf(fileName) {
             if (typeof pdfjsLib === 'undefined') {
-                updateStatus('Fehler: PDF.js-Bibliothek nicht geladen');
+                updateStatus('Fehler: PDF.js nicht geladen');
                 return;
             }
             if (!projectData.files[fileName] || !projectData.files[fileName].pdfData) {
-                updateStatus(`Fehler: Datei "${fileName}" nicht gefunden`);
+                updateStatus(`Fehler: "${fileName}" nicht gefunden`);
                 return;
             }
             try {
@@ -656,44 +708,42 @@
                 }
                 currentPdfFile = fileName;
                 currentPage = 1;
+                textSpanMap.clear();
                 renderPdfList();
-                updateStatus(`PDF "${fileName}" wird geladen...`);
+                updateStatus(`Lade PDF "${fileName}"...`);
                 await renderPage(1);
                 updateStatus(`PDF "${fileName}" geladen`);
             } catch (err) {
-                console.error(`Fehler beim Laden des PDFs (${fileName}):`, err);
-                updateStatus(`Fehler: "${fileName}" konnte nicht geladen werden`);
+                console.error('Fehler:', err);
+                updateStatus(`Fehler: "${fileName}" nicht geladen`);
             }
         }
 
         async function renderPage(pageNum) {
-            if (!currentPdfFile) {
-                updateStatus('Fehler: Kein PDF ausgewählt');
-                return;
-            }
+            if (!currentPdfFile) return;
+
             try {
                 if (!currentPdfDoc) {
-                    const loadingTask = pdfjsLib.getDocument({ data: projectData.files[currentPdfFile].pdfData, disableCache: true });
+                    const loadingTask = pdfjsLib.getDocument({ data: projectData.files[currentPdfFile].pdfData });
                     currentPdfDoc = await loadingTask.promise;
                 }
-                
+
                 currentPage = pageNum;
                 const page = await currentPdfDoc.getPage(pageNum);
                 const scale = 1.5;
                 const viewport = page.getViewport({ scale });
 
                 elements.pdfDisplay.innerHTML = '';
-                
-                // Seite kontrollieren
+
                 const controls = document.createElement('div');
                 controls.style.cssText = 'display: flex; gap: 10px; margin-bottom: 15px; align-items: center; justify-content: center;';
                 controls.innerHTML = `
-                    <button class="btn btn-primary" id="prevPageBtn" ${pageNum <= 1 ? 'disabled' : ''}>◀ Vorherige</button>
+                    <button class="btn btn-primary" id="prevPageBtn" ${pageNum <= 1 ? 'disabled' : ''}>Zurück</button>
                     <span style="font-weight: bold; min-width: 120px; text-align: center;">Seite ${pageNum} / ${currentPdfDoc.numPages}</span>
-                    <button class="btn btn-primary" id="nextPageBtn" ${pageNum >= currentPdfDoc.numPages ? 'disabled' : ''}>Nächste ▶</button>
+                    <button class="btn btn-primary" id="nextPageBtn" ${pageNum >= currentPdfDoc.numPages ? 'disabled' : ''}>Weiter</button>
                 `;
                 elements.pdfDisplay.appendChild(controls);
-                
+
                 const container = document.createElement('div');
                 container.style.position = 'relative';
                 const canvas = document.createElement('canvas');
@@ -711,36 +761,28 @@
                 elements.pdfDisplay.appendChild(container);
 
                 const textContent = await page.getTextContent();
-                pdfjsLib.renderTextLayer({
+                await pdfjsLib.renderTextLayer({
                     textContent,
                     container: textLayer,
                     viewport,
                     textDivs: []
-                }).promise.then(() => {
-                    setupTextInteractivity(textLayer, pageNum);
-                    restoreAnnotations(container, pageNum);
-                }).catch(err => {
-                    console.error('Fehler beim Laden der Textschicht:', err);
-                    updateStatus('Warnung: PDF enthält keinen Text');
+                }).promise;
+
+                setupTextInteractivity(textLayer, pageNum);
+                restoreAnnotations(container, pageNum);
+
+                document.getElementById('prevPageBtn')?.addEventListener('click', () => {
+                    if (currentPage > 1) renderPage(currentPage - 1);
                 });
-                
-                // Seite wechseln
-                document.getElementById('prevPageBtn').addEventListener('click', () => {
-                    if (currentPage > 1) {
-                        renderPage(currentPage - 1);
-                    }
+
+                document.getElementById('nextPageBtn')?.addEventListener('click', () => {
+                    if (currentPage < currentPdfDoc.numPages) renderPage(currentPage + 1);
                 });
-                
-                document.getElementById('nextPageBtn').addEventListener('click', () => {
-                    if (currentPage < currentPdfDoc.numPages) {
-                        renderPage(currentPage + 1);
-                    }
-                });
-                
-                updateStatus(`Seite ${pageNum}/${currentPdfDoc.numPages} wird angezeigt`);
+
+                updateStatus(`Seite ${pageNum}/${currentPdfDoc.numPages} angezeigt`);
             } catch (err) {
-                console.error('Fehler beim Anzeigen der Seite:', err);
-                updateStatus('Fehler: PDF-Seite konnte nicht angezeigt werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Seite nicht angezeigt');
             }
         }
 
@@ -749,24 +791,23 @@
             spans.forEach((span, index) => {
                 const text = span.textContent.trim();
                 if (!text) return;
+
                 const spanId = `span_${pageNum}_${index}`;
                 span.dataset.id = spanId;
                 textSpanMap.set(spanId, { text, page: pageNum });
 
-                // Linksklick
                 span.addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (projectData.isEraser) {
                         removeAnnotationById(spanId, pageNum);
                     } else if (projectData.activeLabel) {
-                        addAnnotationById(spanId, pageNum, 1);
+                        addAnnotationById(spanId, pageNum);
                     } else {
-                        updateStatus('Fehler: Keine Beschriftung ausgewählt');
+                        updateStatus('Fehler: Kein Label ausgewählt');
                     }
                     restoreAnnotations(textLayer.parentElement, pageNum);
                 });
 
-                // Rechtsklick - Gruppenmenü
                 span.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -787,28 +828,30 @@
             });
         }
 
-        function addAnnotationById(spanId, pageNum, group) {
+        function addAnnotationById(spanId, pageNum, overrideGroup) {
             try {
-                // Zuerst alle Beschriftungen für diesen Span entfernen
                 Object.keys(projectData.classes).forEach(label => {
                     const annotations = projectData.files[currentPdfFile].annotations[label] || [];
                     projectData.files[currentPdfFile].annotations[label] = annotations.filter(
                         ann => ann.spanId !== spanId
                     );
                 });
-                
-                // Zur neuen Beschriftung hinzufügen
+
+                const finalGroup = overrideGroup !== undefined
+                    ? overrideGroup
+                    : projectData.classGroups[projectData.activeLabel];
+
                 if (!projectData.files[currentPdfFile].annotations[projectData.activeLabel]) {
                     projectData.files[currentPdfFile].annotations[projectData.activeLabel] = [];
                 }
                 projectData.files[currentPdfFile].annotations[projectData.activeLabel].push({
                     spanId: spanId,
                     page: pageNum,
-                    group: group || 1
+                    group: finalGroup
                 });
             } catch (err) {
-                console.error('Fehler beim Beschriftung:', err);
-                updateStatus('Fehler: Beschriftung konnte nicht hinzugefügt werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Beschriftung nicht hinzugefügt');
             }
         }
 
@@ -821,8 +864,8 @@
                     );
                 });
             } catch (err) {
-                console.error('Fehler beim Entfernen der Beschriftung:', err);
-                updateStatus('Fehler: Beschriftung konnte nicht entfernt werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Beschriftung nicht entfernt');
             }
         }
 
@@ -835,7 +878,6 @@
         }
 
         function showContextMenu(x, y, spanId, pageNum, annotation) {
-            // Altes Menü entfernen
             const existingMenu = document.querySelector('.context-menu');
             if (existingMenu) existingMenu.remove();
 
@@ -845,7 +887,7 @@
             menu.style.top = y + 'px';
             menu.innerHTML = `
                 <div class="context-menu-item" data-action="change-group">
-                    Gruppe ändern (Aktuell: ${annotation.group || 1})
+                    Gruppe ändern (Aktuell: ${annotation.group ?? 'keine'})
                 </div>
                 <div class="context-menu-divider"></div>
                 <div class="context-menu-item" data-action="remove">
@@ -854,12 +896,13 @@
             `;
 
             menu.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const action = e.target.dataset.action;
                 if (action === 'change-group') {
                     showGroupDialog(spanId, pageNum, annotation);
                 } else if (action === 'remove') {
                     removeAnnotationById(spanId, pageNum);
-                    restoreAnnotations(document.querySelector('#pdfDisplay > div'), pageNum);
+                    restoreAnnotations(document.querySelector('#pdfDisplay > div:last-child'), pageNum);
                 }
                 menu.remove();
             });
@@ -870,12 +913,12 @@
         function showGroupDialog(spanId, pageNum, annotation) {
             const overlay = document.createElement('div');
             overlay.className = 'overlay';
-            
+
             const dialog = document.createElement('div');
             dialog.className = 'group-input-dialog';
             dialog.innerHTML = `
                 <h3>Gruppennummer zuweisen</h3>
-                <input type="number" id="groupInput" min="1" value="${annotation.group || 1}" placeholder="Gruppennummer (1, 2, 3...)">
+                <input type="text" id="groupInput" value="${annotation.group ?? ''}" placeholder="Leer lassen = keine Gruppe">
                 <div class="group-input-dialog-buttons">
                     <button class="btn btn-primary" id="groupOkBtn">OK</button>
                     <button class="btn btn-danger" id="groupCancelBtn">Abbrechen</button>
@@ -890,11 +933,12 @@
             input.select();
 
             document.getElementById('groupOkBtn').addEventListener('click', () => {
-                const groupNum = parseInt(input.value) || 1;
+                const val = input.value.trim();
+                const groupNum = val === '' ? null : (parseInt(val) || null);
                 changeAnnotationGroup(spanId, pageNum, annotation.label, groupNum);
                 overlay.remove();
                 dialog.remove();
-                restoreAnnotations(document.querySelector('#pdfDisplay > div'), pageNum);
+                restoreAnnotations(document.querySelector('#pdfDisplay > div:last-child'), pageNum);
             });
 
             document.getElementById('groupCancelBtn').addEventListener('click', () => {
@@ -914,16 +958,17 @@
                 const ann = annotations.find(a => a.spanId === spanId);
                 if (ann) {
                     ann.group = newGroup;
-                    updateStatus(`Gruppe auf ${newGroup} geändert`);
+                    updateStatus(`Gruppe ${newGroup === null ? 'entfernt' : 'auf ' + newGroup + ' geändert'}`);
                 }
             } catch (err) {
-                console.error('Fehler beim Ändern der Gruppe:', err);
-                updateStatus('Fehler: Gruppe konnte nicht geändert werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: Gruppe nicht geändert');
             }
         }
 
         function restoreAnnotations(container, pageNum) {
-            // Alte Highlights und Badges entfernen
+            if (!container) return;
+
             const existingHighlights = container.querySelectorAll('.annotation-highlight');
             const existingBadges = container.querySelectorAll('.group-badge');
             existingHighlights.forEach(h => h.remove());
@@ -932,39 +977,118 @@
             Object.entries(projectData.classes).forEach(([label, color]) => {
                 const annotations = projectData.files[currentPdfFile]?.annotations[label] || [];
                 annotations.forEach(ann => {
-                    if (ann.page === pageNum) {
-                        const textLayer = container.querySelector('.text-layer');
-                        const span = textLayer.querySelector(`[data-id="${ann.spanId}"]`);
-                        if (!span) return;
+                    if (ann.page !== pageNum) return;
 
-                        const spanRect = span.getBoundingClientRect();
-                        const containerRect = container.getBoundingClientRect();
+                    const textLayer = container.querySelector('.text-layer');
+                    if (!textLayer) return;
 
-                        const highlight = document.createElement('div');
-                        highlight.className = 'annotation-highlight';
-                        highlight.style.backgroundColor = color;
-                        highlight.style.opacity = '0.3';
-                        highlight.style.left = `${spanRect.left - containerRect.left}px`;
-                        highlight.style.top = `${spanRect.top - containerRect.top}px`;
-                        highlight.style.width = `${spanRect.width}px`;
-                        highlight.style.height = `${spanRect.height}px`;
-                        highlight.style.borderColor = color;
-                        container.appendChild(highlight);
+                    const span = textLayer.querySelector(`[data-id="${ann.spanId}"]`);
+                    if (!span) return;
 
-                        // Gruppenbadge hinzufügen (für Gruppe 2 und höher)
-                        if (ann.group && ann.group > 1) {
-                            const badge = document.createElement('div');
-                            badge.className = 'group-badge';
-                            badge.textContent = ann.group;
-                            badge.style.borderColor = color;
-                            badge.style.color = color;
-                            badge.style.left = `${spanRect.right - containerRect.left - 10}px`;
-                            badge.style.top = `${spanRect.top - containerRect.top - 5}px`;
-                            container.appendChild(badge);
-                        }
+                    const spanRect = span.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+
+                    // HER ZAMAN highlight ekle
+                    const highlight = document.createElement('div');
+                    highlight.className = 'annotation-highlight';
+                    highlight.style.backgroundColor = color;
+                    highlight.style.opacity = '0.3';
+                    highlight.style.left = `${spanRect.left - containerRect.left}px`;
+                    highlight.style.top = `${spanRect.top - containerRect.top}px`;
+                    highlight.style.width = `${spanRect.width}px`;
+                    highlight.style.height = `${spanRect.height}px`;
+                    highlight.style.borderColor = color;
+                    container.appendChild(highlight);
+
+                    // SADECE grup varsa badge ekle
+                    if (ann.group !== null && ann.group !== undefined) {
+                        const badge = document.createElement('div');
+                        badge.className = 'group-badge';
+                        badge.textContent = ann.group;
+                        badge.style.borderColor = color;
+                        badge.style.color = color;
+                        badge.style.left = `${spanRect.right - containerRect.left - 10}px`;
+                        badge.style.top = `${spanRect.top - containerRect.top - 5}px`;
+                        container.appendChild(badge);
                     }
                 });
             });
+        }
+
+        function loadJsonAnnotations(e) {
+            try {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (!currentPdfFile) {
+                    alert('Bitte laden Sie zuerst eine PDF-Datei');
+                    updateStatus('Fehler: Keine PDF geladen');
+                    e.target.value = '';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const jsonData = JSON.parse(event.target.result);
+
+                        if (!jsonData.files || !jsonData.files[currentPdfFile]) {
+                            alert('Die JSON-Datei enthält keine Annotationen für die aktuelle PDF');
+                            updateStatus('Fehler: Keine passenden Annotationen');
+                            return;
+                        }
+
+                        const fileAnnotations = jsonData.files[currentPdfFile];
+
+                        Object.entries(fileAnnotations).forEach(([key, texts]) => {
+                            let label = key;
+                            let groupNum = null;
+
+                            const groupMatch = key.match(/^(.+)_Grup(\d+)$/);
+                            if (groupMatch) {
+                                label = groupMatch[1];
+                                groupNum = parseInt(groupMatch[2]);
+                            }
+
+                            if (!projectData.classes[label]) {
+                                alert(`Label "${label}" existiert nicht im Projekt. Bitte fügen Sie es zuerst hinzu.`);
+                                return;
+                            }
+
+                            texts.forEach(text => {
+                                for (const [spanId, spanInfo] of textSpanMap.entries()) {
+                                    if (spanInfo.text === text && spanInfo.page === currentPage) {
+                                        const existingAnnotations = projectData.files[currentPdfFile].annotations[label] || [];
+                                        const alreadyExists = existingAnnotations.some(ann => ann.spanId === spanId);
+
+                                        if (!alreadyExists) {
+                                            projectData.activeLabel = label;
+                                            addAnnotationById(spanId, currentPage, groupNum);
+                                        }
+                                        break;
+                                    }
+                                }
+                            });
+                        });
+
+                        const container = document.querySelector('#pdfDisplay > div:last-child');
+                        if (container) {
+                            restoreAnnotations(container, currentPage);
+                        }
+
+                        updateStatus('JSON-Annotationen erfolgreich geladen');
+                    } catch (err) {
+                        console.error('Fehler beim Verarbeiten der JSON:', err);
+                        updateStatus('Fehler: JSON-Datei konnte nicht verarbeitet werden');
+                        alert('JSON-Datei konnte nicht verarbeitet werden: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            } catch (err) {
+                console.error('Fehler beim Laden der JSON:', err);
+                updateStatus('Fehler: JSON nicht geladen');
+            }
         }
 
         function exportJson() {
@@ -975,36 +1099,28 @@
                     classes: projectData.classes,
                     files: {}
                 };
-                
+
                 Object.entries(projectData.files).forEach(([fileName, data]) => {
                     exportData.files[fileName] = {};
                     Object.entries(projectData.classes).forEach(([label]) => {
                         const annotations = data.annotations[label] || [];
-                        
-                        // In Gruppen aufteilen
+
                         const groups = {};
                         annotations.forEach(ann => {
-                            const groupNum = ann.group || 1;
-                            if (!groups[groupNum]) {
-                                groups[groupNum] = [];
-                            }
+                            const groupNum = (ann.group !== null && ann.group !== undefined) ? ann.group : 'default';
+                            if (!groups[groupNum]) groups[groupNum] = [];
                             const spanInfo = textSpanMap.get(ann.spanId);
-                            if (spanInfo) {
-                                groups[groupNum].push(spanInfo.text);
-                            }
+                            if (spanInfo) groups[groupNum].push(spanInfo.text);
                         });
-                        
-                        // Jede Gruppe als separater Schlüssel hinzufügen
+
                         Object.entries(groups).forEach(([groupNum, texts]) => {
-                            const key = groupNum > 1 ? `${label}_Gruppe${groupNum}` : label;
+                            const key = groupNum === 'default' ? label : `${label}_Grup${groupNum}`;
                             exportData.files[fileName][key] = texts;
                         });
                     });
                 });
-                
-                // PDF-Name ohne Erweiterung
+
                 const pdfName = currentPdfFile ? currentPdfFile.replace('.pdf', '') : projectData.name || 'export';
-                
                 const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1012,46 +1128,38 @@
                 a.download = `${pdfName}.json`;
                 a.click();
                 URL.revokeObjectURL(url);
-                updateStatus('Als JSON exportiert');
+                updateStatus('JSON exportiert');
             } catch (err) {
-                console.error('Fehler beim JSON-Export:', err);
-                updateStatus('Fehler: JSON konnte nicht exportiert werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: JSON-Export fehlgeschlagen');
             }
         }
 
         function exportCsv() {
             try {
-                let csv = 'PDF-Datei,Beschriftung,Wert\n';
-                
+                let csv = 'PDF-Datei,Label,Wert\n';
+
                 Object.entries(projectData.files).forEach(([fileName, data]) => {
                     Object.entries(projectData.classes).forEach(([label]) => {
                         const annotations = data.annotations[label] || [];
-                        
-                        // In Gruppen aufteilen
+
                         const groups = {};
                         annotations.forEach(ann => {
-                            const groupNum = ann.group || 1;
-                            if (!groups[groupNum]) {
-                                groups[groupNum] = [];
-                            }
+                            const groupNum = (ann.group !== null && ann.group !== undefined) ? ann.group : 'default';
+                            if (!groups[groupNum]) groups[groupNum] = [];
                             const spanInfo = textSpanMap.get(ann.spanId);
-                            if (spanInfo) {
-                                groups[groupNum].push(spanInfo.text);
-                            }
+                            if (spanInfo) groups[groupNum].push(spanInfo.text);
                         });
-                        
-                        // Jede Gruppe als separate Zeile hinzufügen
+
                         Object.entries(groups).forEach(([groupNum, texts]) => {
-                            const key = groupNum > 1 ? `${label}_Gruppe${groupNum}` : label;
+                            const key = groupNum === 'default' ? label : `${label}_Grup${groupNum}`;
                             const value = texts.join(' ');
                             csv += `"${fileName}","${key}","${value}"\n`;
                         });
                     });
                 });
-                
-                // PDF-Name ohne Erweiterung
+
                 const pdfName = currentPdfFile ? currentPdfFile.replace('.pdf', '') : projectData.name || 'export';
-                
                 const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -1059,10 +1167,10 @@
                 a.download = `${pdfName}.csv`;
                 a.click();
                 URL.revokeObjectURL(url);
-                updateStatus('Als CSV exportiert');
+                updateStatus('CSV exportiert');
             } catch (err) {
-                console.error('Fehler beim CSV-Export:', err);
-                updateStatus('Fehler: CSV konnte nicht exportiert werden');
+                console.error('Fehler:', err);
+                updateStatus('Fehler: CSV-Export fehlgeschlagen');
             }
         }
 
@@ -1071,4 +1179,5 @@
         }
     </script>
 </body>
+
 </html>
